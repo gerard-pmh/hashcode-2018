@@ -28,8 +28,8 @@ fun rideDistance(ride: Ride): Int {
     return distance(ride.startX, ride.startY, ride.endX, ride.endY)
 }
 
-fun totalDistance(car: Car, ride: Ride) {
-    distanceFromStart(car, ride) + rideDistance(ride)
+fun totalDistance(car: Car, ride: Ride): Int {
+    return distanceFromStart(car, ride) + rideDistance(ride)
 }
 
 fun parseFile(filePath: String): City {
