@@ -20,6 +20,18 @@ fun distance(a: Int, b: Int, x: Int, y: Int): Int {
     return abs(a - x) + abs(b - y)
 }
 
+fun distanceFromStart(car: Car, ride: Ride): Int {
+    return distance(car.x, car.y, ride.startX, ride.startY)
+}
+
+fun rideDistance(ride: Ride): Int {
+    return distance(ride.startX, ride.startY, ride.endX, ride.endY)
+}
+
+fun totalDistance(car: Car, ride: Ride) {
+    distanceFromStart(car, ride) + rideDistance(ride)
+}
+
 fun parseFile(filePath: String): City {
 
     val lines = File(filePath).readLines()
