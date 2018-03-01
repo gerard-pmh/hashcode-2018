@@ -5,22 +5,41 @@ import kotlin.math.abs
 
 fun main(args: Array<String>) {
 
-    val city = parseFile("./assets/a_example.in")
+    val city = parseFile("./assets/b_should_be_easy.in")
     val cars = List(city.carCtn, { Car(0, 0, null) })
     val cityState = CityState(0, cars)
 
+    val solution = hashMapOf<Int, MutableList<Int>>()
+
     while (cityState.step < city.stepCtn) {
-        cityState.cars.forEach { car ->
-            city.rides.forEach { ride ->
+        cityState.cars.forEachIndexed { carIndex, car ->
+            city.rides.forEachIndexed { rideIndex, ride ->
                 if (isStartable(car, ride, cityState.step, city.stepCtn)) {
                     car.ride = ride
                     ride.isTaken = true
+
+                    if (solution.containsKey(carIndex)) {
+                        solution.get(carIndex)!!.add(rideIndex)
+                    } else {
+                        solution.set(carIndex, mutableListOf(rideIndex))
+                    }
                 }
             }
             tick(car)
         }
-        println(cityState)
         cityState.step += 1
+    }
+    printSolution(solution)
+}
+
+fun printSolution(solution: HashMap<Int, MutableList<Int>>) {
+    solution.forEach { entry ->
+        print(entry.value.size)
+        entry.value.forEach { value ->
+            print(" ")
+            print(value)
+        }
+        print("\n")
     }
 }
 
