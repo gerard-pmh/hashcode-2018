@@ -4,42 +4,57 @@ import java.io.File
 import kotlin.math.abs
 
 fun main(args: Array<String>) {
-
-    val city = parseFile("./assets/b_should_be_easy.in")
-    val cars = List(city.carCtn, { Car(0, 0, null) })
-    val cityState = CityState(0, cars)
-
-    val solution = hashMapOf<Int, MutableList<Int>>()
-
-    while (cityState.step < city.stepCtn) {
-        cityState.cars.forEachIndexed { carIndex, car ->
-            city.rides.forEachIndexed { rideIndex, ride ->
-                if (isStartable(car, ride, cityState.step, city.stepCtn)) {
-                    car.ride = ride
-                    ride.isTaken = true
-
-                    if (solution.containsKey(carIndex)) {
-                        solution.get(carIndex)!!.add(rideIndex)
-                    } else {
-                        solution.set(carIndex, mutableListOf(rideIndex))
-                    }
-                }
-            }
-            tick(car)
-        }
-        cityState.step += 1
-    }
-    printSolution(solution)
+    listOf("a_example",
+            "b_should_be_easy",
+            "c_no_hurry",
+            "d_metropolis",
+            "e_high_bonus")
+            .forEach { processFile(it) }
 }
 
-fun printSolution(solution: HashMap<Int, MutableList<Int>>) {
-    solution.forEach { entry ->
-        print(entry.value.size)
-        entry.value.forEach { value ->
-            print(" ")
-            print(value)
+fun processFile(fileName: String) {
+
+
+    println("processing file: $fileName")
+
+    val city = parseFile("./inputs/$fileName.in")
+    val solution = hashMapOf<Int, MutableList<Int>>()
+
+    println("number of steps: ${city.stepCtn}")
+
+    with(city) {
+        while (step < stepCtn) {
+            println("current step: $step")
+            cars.forEachIndexed { carIndex, car ->
+                rides.forEachIndexed { rideIndex, ride ->
+                    if (isStartable(car, ride, step, stepCtn)) {
+                        car.currentRide = ride
+                        ride.isTaken = true
+                        if (solution.containsKey(carIndex)) {
+                            solution[carIndex]!!.add(rideIndex)
+                        } else {
+                            solution[carIndex] = mutableListOf(rideIndex)
+                        }
+                    }
+                }
+                tick(car)
+            }
+            step += 1
         }
-        print("\n")
+    }
+    solutionToFile(solution, "./outputs/$fileName.out")
+}
+
+fun solutionToFile(solution: HashMap<Int, MutableList<Int>>, filePath: String) {
+    File(filePath).printWriter().use { out ->
+        solution.forEach { entry ->
+            out.print(entry.value.size)
+            entry.value.forEach { value ->
+                out.print(" ")
+                out.print(value)
+            }
+            out.print("\n")
+        }
     }
 }
 
@@ -51,23 +66,18 @@ fun distanceFromStart(car: Car, ride: Ride): Int {
     return distance(car.x, car.y, ride.startX, ride.startY)
 }
 
-fun rideDistance(ride: Ride): Int {
-    return distance(ride.startX, ride.startY, ride.endX, ride.endY)
-}
-
 fun totalDistance(car: Car, ride: Ride): Int {
-    return distanceFromStart(car, ride) + rideDistance(ride)
+    return distanceFromStart(car, ride) + ride.distance
 }
 
 fun isStartable(car: Car, ride: Ride, step: Int, stepCtn: Int): Boolean {
-    if (car.ride != null) {
+    if (car.currentRide != null) {
         return false
     }
     if (ride.isTaken) {
         return false
     }
-    val remainingSteps = stepCtn - step
-    if (totalDistance(car, ride) > remainingSteps) {
+    if (totalDistance(car, ride) > stepCtn - step) {
         return false
     }
     if (ride.earliestStart > distanceFromStart(car, ride) + step) {
@@ -80,13 +90,15 @@ fun isStartable(car: Car, ride: Ride, step: Int, stepCtn: Int): Boolean {
 }
 
 fun tick(car: Car) {
-    if (car.ride != null) {
-        when {
-            car.x < car.ride!!.endX -> car.x += 1
-            car.x > car.ride!!.endX -> car.x -= 1
-            car.y < car.ride!!.endY -> car.y += 1
-            car.y > car.ride!!.endY -> car.y -= 1
-            else -> car.ride = null
+    with(car) {
+        if (currentRide != null) {
+            when {
+                x < currentRide!!.endX -> x += 1
+                x > currentRide!!.endX -> x -= 1
+                y < currentRide!!.endY -> y += 1
+                y > currentRide!!.endY -> y -= 1
+                else -> currentRide = null
+            }
         }
     }
 }
@@ -116,7 +128,9 @@ data class City(val rowCtn: Int,
                 val rideCtn: Int,
                 val bonusCtn: Int,
                 val stepCtn: Int,
-                val rides: List<Ride>)
+                val rides: List<Ride>,
+                var step: Int = 0,
+                val cars: List<Car> = List(carCtn, { Car(0, 0, null) }))
 
 data class Ride(val startX: Int,
                 val startY: Int,
@@ -124,11 +138,9 @@ data class Ride(val startX: Int,
                 val endY: Int,
                 val earliestStart: Int,
                 val latestFinish: Int,
+                val distance: Int = distance(startX, startY, endX, endY),
                 var isTaken: Boolean = false)
-
-data class CityState(var step: Int,
-                     val cars: List<Car>)
 
 data class Car(var x: Int,
                var y: Int,
-               var ride: Ride?)
+               var currentRide: Ride?)
