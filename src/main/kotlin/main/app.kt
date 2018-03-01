@@ -1,6 +1,7 @@
 package main
 
 import java.io.File
+import kotlin.math.abs
 
 fun main(args: Array<String>) {
 
@@ -15,10 +16,9 @@ fun main(args: Array<String>) {
 
 }
 
-
-//fun findNearestRide(car: Car, rides: List<Ride>): Ride {
-//    rides.minBy {  }
-//}
+fun distance(a: Int, b: Int, x: Int, y: Int): Int {
+    return abs(a - x) + abs(b - y)
+}
 
 fun parseFile(filePath: String): City {
 
