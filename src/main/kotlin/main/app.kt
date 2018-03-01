@@ -1,7 +1,24 @@
+package main
+
 import java.io.File
 
 fun main(args: Array<String>) {
+
+    val city = parseFile("./assets/a_example.in")
+    val cars = List(city.carCtn, { Car(0, 0, 0, 0) })
+    val cityState = CityState(0, cars, city.rides.toMutableList())
+
+    while (cityState.step < city.stepCtn) {
+        cityState.step += 1
+        cityState.cars.forEach { it.x = it.nextX; it.y = it.nextY }
+    }
+
 }
+
+
+//fun findNearestRide(car: Car, rides: List<Ride>): Ride {
+//    rides.minBy {  }
+//}
 
 fun parseFile(filePath: String): City {
 
@@ -27,7 +44,7 @@ data class City(val rowCtn: Int,
                 val carCtn: Int,
                 val rideCtn: Int,
                 val bonusCtn: Int,
-                val setCtn: Int,
+                val stepCtn: Int,
                 val rides: List<Ride>)
 
 data class Ride(val startX: Int,
@@ -36,3 +53,12 @@ data class Ride(val startX: Int,
                 val endY: Int,
                 val earliestStart: Int,
                 val latestFinish: Int)
+
+data class CityState(var step: Int,
+                     val cars: List<Car>,
+                     val availableRides: MutableList<Ride>)
+
+data class Car(var x: Int,
+               var y: Int,
+               var nextX: Int,
+               var nextY: Int)
