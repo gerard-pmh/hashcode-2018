@@ -7,12 +7,21 @@ fun main(args: Array<String>) {
 
     val city = parseFile("./assets/a_example.in")
     val cars = List(city.carCtn, { Car(0, 0, null) })
-    val cityState = CityState(0, cars, city.rides.toMutableList())
+    val cityState = CityState(0, cars)
 
     while (cityState.step < city.stepCtn) {
+        cityState.cars.forEach { car ->
+            city.rides.forEach { ride ->
+                if (isStartable(car, ride, cityState.step, city.stepCtn)) {
+                    car.ride = ride
+                    ride.isTaken = true
+                }
+            }
+            tick(car)
+        }
+        println(cityState)
         cityState.step += 1
     }
-
 }
 
 fun distance(a: Int, b: Int, x: Int, y: Int): Int {
@@ -32,6 +41,12 @@ fun totalDistance(car: Car, ride: Ride): Int {
 }
 
 fun isStartable(car: Car, ride: Ride, step: Int, stepCtn: Int): Boolean {
+    if (car.ride != null) {
+        return false
+    }
+    if (ride.isTaken) {
+        return false
+    }
     val remainingSteps = stepCtn - step
     if (totalDistance(car, ride) > remainingSteps) {
         return false
@@ -46,11 +61,14 @@ fun isStartable(car: Car, ride: Ride, step: Int, stepCtn: Int): Boolean {
 }
 
 fun tick(car: Car) {
-    when {
-        car.x < car.ride!!.endX -> car.x += 1
-        car.x > car.ride!!.endX -> car.x -= 1
-        car.y < car.ride!!.endY -> car.y += 1
-        car.y > car.ride!!.endY -> car.y -= 1
+    if (car.ride != null) {
+        when {
+            car.x < car.ride!!.endX -> car.x += 1
+            car.x > car.ride!!.endX -> car.x -= 1
+            car.y < car.ride!!.endY -> car.y += 1
+            car.y > car.ride!!.endY -> car.y -= 1
+            else -> car.ride = null
+        }
     }
 }
 
@@ -86,11 +104,11 @@ data class Ride(val startX: Int,
                 val endX: Int,
                 val endY: Int,
                 val earliestStart: Int,
-                val latestFinish: Int)
+                val latestFinish: Int,
+                var isTaken: Boolean = false)
 
 data class CityState(var step: Int,
-                     val cars: List<Car>,
-                     val availableRides: MutableList<Ride>)
+                     val cars: List<Car>)
 
 data class Car(var x: Int,
                var y: Int,
