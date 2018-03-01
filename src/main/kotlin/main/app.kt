@@ -46,14 +46,11 @@ fun isStartable(car: Car, ride: Ride, step: Int, stepCtn: Int): Boolean {
 }
 
 fun tick(car: Car) {
-    if (car.x < car.ride!!.endX) {
-        car.x += 1
-    } else if (car.x > car.ride!!.endX) {
-        car.x -= 1
-    } else if (car.y < car.ride!!.endY) {
-        car.y += 1
-    } else if (car.y > car.ride!!.endY) {
-        car.y -= 1
+    when {
+        car.x < car.ride!!.endX -> car.x += 1
+        car.x > car.ride!!.endX -> car.x -= 1
+        car.y < car.ride!!.endY -> car.y += 1
+        car.y > car.ride!!.endY -> car.y -= 1
     }
 }
 
