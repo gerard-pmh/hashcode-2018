@@ -32,6 +32,20 @@ fun totalDistance(car: Car, ride: Ride): Int {
     return distanceFromStart(car, ride) + rideDistance(ride)
 }
 
+fun isStartable(car: Car, ride: Ride, step: Int, stepCtn: Int): Boolean {
+    val remainingSteps = stepCtn - step
+    if (totalDistance(car, ride) > remainingSteps) {
+        return false
+    }
+    if (ride.earliestStart > distanceFromStart(car, ride) + step) {
+        return false
+    }
+    if (ride.latestFinish < totalDistance(car, ride) + step) {
+        return false
+    }
+    return true
+}
+
 fun parseFile(filePath: String): City {
 
     val lines = File(filePath).readLines()
