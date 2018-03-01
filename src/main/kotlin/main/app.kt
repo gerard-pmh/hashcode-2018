@@ -6,12 +6,11 @@ import kotlin.math.abs
 fun main(args: Array<String>) {
 
     val city = parseFile("./assets/a_example.in")
-    val cars = List(city.carCtn, { Car(0, 0, 0, 0) })
+    val cars = List(city.carCtn, { Car(0, 0, null) })
     val cityState = CityState(0, cars, city.rides.toMutableList())
 
     while (cityState.step < city.stepCtn) {
         cityState.step += 1
-        cityState.cars.forEach { it.x = it.nextX; it.y = it.nextY }
     }
 
 }
@@ -44,6 +43,18 @@ fun isStartable(car: Car, ride: Ride, step: Int, stepCtn: Int): Boolean {
         return false
     }
     return true
+}
+
+fun tick(car: Car) {
+    if (car.x < car.ride!!.endX) {
+        car.x += 1
+    } else if (car.x > car.ride!!.endX) {
+        car.x -= 1
+    } else if (car.y < car.ride!!.endY) {
+        car.y += 1
+    } else if (car.y > car.ride!!.endY) {
+        car.y -= 1
+    }
 }
 
 fun parseFile(filePath: String): City {
@@ -86,5 +97,4 @@ data class CityState(var step: Int,
 
 data class Car(var x: Int,
                var y: Int,
-               var nextX: Int,
-               var nextY: Int)
+               var ride: Ride?)
